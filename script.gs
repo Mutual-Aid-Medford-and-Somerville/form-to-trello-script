@@ -97,29 +97,29 @@ function submitToTrello(e) {
   
   // Subject line will be the title of the event on Trello card
   // subject is: [name] + [pronouns] + [city]
-  var subject = latestItemResponses[1].getResponse() + ' (' + latestItemResponses[2].getResponse() + '), ' + latestItemResponses[3].getResponse();  
+  var subject = latestItemResponses[1].getResponse() + ' (' + latestItemResponses[3].getResponse() + '), ' + latestItemResponses[4].getResponse();  
   // This is the beginning of the description in trello. Later we'll add request details.
   // To start, we add contact info, neighborhood if desired, and degree of comfort sharing the need
   var body = "";
   var timeString = Utilities.formatDate(timestamp, "EST", "EEE, d MMM yyyy HH:mm:ss z") // format the timestamp for the description
   body = body.concat(Utilities.formatString(
-    '**Timestamp:** %s\n**I am filling this out:** %s\n**Contact Info:** %s\n',
-    timeString, latestItemResponses[0].getResponse(), latestItemResponses[5].getResponse()
+    '**Timestamp:** %s\n**Language Preference:** %s\n**I am filling this out:** %s\n**Contact Info:** %s\n',
+    timeString, latestItemResponses[2].getResponse(), latestItemResponses[0].getResponse(), latestItemResponses[5].getResponse()
   ));
   
   // add neighborhood if the person is a "yes" or a "maybe" for getting connected
-  if (latestItemResponses[6].getResponse() != 'No') {
+  if (latestItemResponses[7].getResponse() != 'No') {
     body = body.concat(Utilities.formatString(
       '**Connect to neighborhood?** %s\n**Neighborhood:** %s\n',
-      latestItemResponses[6].getResponse(), latestItemResponses[7].getResponse()
+      latestItemResponses[7].getResponse(), latestItemResponses[8].getResponse()
     ));
   }
   
   // add the details that are collected at the end of the form – personal info, sharing desire
   var responseLength = latestItemResponses.length;
   body = body.concat(Utilities.formatString(
-    '**Personal info:** %s\n**Level of sharing I am ok with:** %s\n**What information I am ok with sharing:** %s\n\n',
-    latestItemResponses[responseLength - 3].getResponse(), latestItemResponses[responseLength - 2].getResponse(),latestItemResponses[responseLength - 1].getResponse()
+    '**Personal info:** %s\n**Level of sharing I am ok with:** %s\n**What information I am ok with sharing:** %s\n**Follow up about supporting others:** %s\n\n',
+    latestItemResponses[responseLength - 4].getResponse(), latestItemResponses[responseLength - 3].getResponse(),latestItemResponses[responseLength - 2].getResponse(),latestItemResponses[responseLength - 1].getResponse()
   ));
   
   // add labels and descriptions based on what type of help is requested
@@ -127,13 +127,13 @@ function submitToTrello(e) {
   // for each type of support requested, create a separate card
   var localBody = "";
   var defaultLabels = ['English'];
-  for (var i = 8; i < latestItemResponses.length; i++) {
+  for (var i = 9; i < latestItemResponses.length; i++) {
     // check for $$$ requests first
     if (latestItemResponses[i].getItem().getTitle() == 'Do you need financial resources?' && latestItemResponses[i].getResponse() == 'Yes') {
       localBody = body.slice(0);
       localBody = localBody.concat('##Money Requests##\n');
 
-      for (var j = 1; j < 9; j++) {
+      for (var j = 1; j < 8; j++) {
         var formatted = Utilities.formatString("**%s**\n %s\n\n", latestItemResponses[i+j].getItem().getTitle(), latestItemResponses[i+j].getResponse());
         formatted = formatted.concat('\n');
         localBody = localBody.concat(formatted);
@@ -141,7 +141,7 @@ function submitToTrello(e) {
       
       createCard(subject, localBody, [...defaultLabels, '$$$']); // add money label to labels list
       
-      i = i + 8;
+      i = i + 7;
     }
     
     // check for supplies/errands
@@ -158,36 +158,6 @@ function submitToTrello(e) {
       createCard(subject, localBody, [...defaultLabels, 'Supplies/Errands']); // add supplies label to labels list
       
       i = i + 7;
-    }
-    
-    if (latestItemResponses[i].getItem().getTitle() == 'Do you need help with transportation or ridesharing?' && latestItemResponses[i].getResponse() == 'Yes') {
-      localBody = body.slice(0);
-      localBody = localBody.concat('##Rideshare##\n');
-
-      for (var j = 1; j < 6; j++) {
-        var formatted = Utilities.formatString("**%s**\n %s\n\n", latestItemResponses[i+j].getItem().getTitle(), latestItemResponses[i+j].getResponse());
-        formatted = formatted.concat('\n');
-        localBody = localBody.concat(formatted);
-      }
-      
-      createCard(subject, localBody, [...defaultLabels, 'Transportation/Rideshare']); // add rideshare label to labels list
-      
-      i = i + 5;
-    }
-    
-    if (latestItemResponses[i].getItem().getTitle() == 'Do you need help with housing and/or storage?' && latestItemResponses[i].getResponse() == 'Yes') {
-      localBody = body.slice(0);
-      localBody = localBody.concat('##Housing & Storage##\n');
-
-      for (var j = 1; j < 15; j++) {
-        var formatted = Utilities.formatString("**%s**\n %s\n\n", latestItemResponses[i+j].getItem().getTitle(), latestItemResponses[i+j].getResponse());
-        formatted = formatted.concat('\n');
-        localBody = localBody.concat(formatted);
-      }
-      
-      createCard(subject, localBody, [...defaultLabels, 'Housing/Storage']); // add housing label to labels list
-      
-      i = i + 14;
     }
     
     if (latestItemResponses[i].getItem().getTitle() == 'Are you looking for in person childcare and/or online activities for kids and/or petcare?' && latestItemResponses[i].getResponse() == 'Yes') {
