@@ -88,20 +88,13 @@ function createCard(name, description, labels) {
   Logger.log('create card - response', response);
 }
 
-var cardFieldCount = {
-  money: 7,
-  supplies: 7,
-  childcare: 11,
-  emotional: 1,
-  resources: 2,
-};
-
 var cardFieldTitles = {
   money: '##Money Requests##',
   supplies: '##Supplies/Errands##',
   childcare: '##Childcare & Petcare##',
   emotional: '##Emotional/Spiritual Support##',
   resources: '##Resources##',
+  other: '##Other##',
 };
 
 var cardLabels = {
@@ -110,6 +103,7 @@ var cardLabels = {
   childcare: ['Childcare/Petcare'],
   emotional: ['Emotional/Spiritual'],
   resources: ['Resources'],
+  other: [],
 };
 
 var cardStartHeaders = {
@@ -120,35 +114,65 @@ var cardStartHeaders = {
   'Are you looking for emotional or spiritual support?': 'emotional',
   'Do you need resource support, or support with anything not on this form already?':
     'resources',
+  'Anything about yourself you’d like to share (zero expectation if you’d rather not)':
+    'other',
 };
+
+const cardTypeEnabled = {
+  money: true,
+  supplies: true,
+  childcare: true,
+  emotional: true,
+  resources: true,
+  other: false,
+};
+
+var cardStartHeaderKeys = Object.keys(cardStartHeaders);
 
 var defaultLabels = ['English'];
 
 function processCard(i, body, cardType, latestItemResponses, labels, subject) {
   var localBody = body.slice(0);
   localBody = localBody.concat(cardFieldTitles[cardType] + '\n');
-  const end = i + cardFieldCount[cardType];
+  let currentTitle = latestItemResponses[i].getItem().getTitle();
+  const responseCount = latestItemResponses.length;
+  let count = 0;
   do {
-    i++;
+    count++;
     var formatted = Utilities.formatString(
       '**%s**\n %s\n\n',
-      latestItemResponses[i].getItem().getTitle(),
+      currentTitle,
       latestItemResponses[i].getResponse()
     );
     formatted = formatted.concat('\n');
     localBody = localBody.concat(formatted);
-  } while (end > i);
+    currentTitle = latestItemResponses[++i].getItem().getTitle();
+  } while (
+    // keep looking for the next header or the end of the data
+    cardStartHeaders[currentTitle] === undefined &&
+    i < responseCount - 1
+  );
 
   createCard(subject, localBody, [...defaultLabels, labels]);
-  return i;
+  return count;
 }
 
 function parseLatestItemResponses(latestItemResponses, i, body, subject) {
   const headerTitle = latestItemResponses[i].getItem().getTitle();
   const response = latestItemResponses[i].getResponse();
-  for (const cardStartHeaderKey of Object.keys(cardStartHeaders)) {
+  for (const cardStartHeaderKey of cardStartHeaderKeys) {
     if (headerTitle == cardStartHeaderKey && response == 'Yes') {
       const cardType = cardStartHeaders[cardStartHeaderKey];
+      if (!cardType) {
+        throw new Error(`Missing cardType ${cardType}`);
+      }
+
+      if (cardTypeEnabled[cardType] !== true) {
+        // we don't parse a card for the 'other'
+        Logger.log('Skipping parsing because this card type is not enabled');
+        continue;
+      }
+
       return processCard(
         i,
         body,
@@ -159,7 +183,8 @@ function parseLatestItemResponses(latestItemResponses, i, body, subject) {
       );
     }
   }
-  return i;
+  // when nothing could be processed advance to the next row
+  return 1;
 }
 
 function submitToTrello(e) {
@@ -220,7 +245,10 @@ function submitToTrello(e) {
   // add labels and descriptions based on what type of help is requested
   // the description will contain each question in a section, and it's corresponding answer
   // for each type of support requested, create a separate card
-  for (var i = 9; i < latestItemResponses.length; i++) {
-    i = parseLatestItemResponses(latestItemResponses, i, body, subject);
+  let i = 9;
+  const responseCount = latestItemResponses.length;
+  while (i < responseCount) {
+    // returns the number of columns parsed (always at least one)
+    i += parseLatestItemResponses(latestItemResponses, i, body, subject);
   }
 }
