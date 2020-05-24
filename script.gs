@@ -211,10 +211,11 @@ function submitToTrello(e) {
   ); // format the timestamp for the description
   body = body.concat(
     Utilities.formatString(
-      '**Timestamp:** %s\n**Language Preference:** %s\n**I am filling this out:** %s\n**Contact Info:** %s\n',
+      '**Timestamp:** %s\n**Language Preference:** %s\n**I am filling this out:** %s\n**Preferred Contact Method:** %s\n**Contact Info:** %s\n',
       timeString,
       latestItemResponses[2].getResponse(),
       latestItemResponses[0].getResponse(),
+      latestItemResponses[5].getResponse(),
       latestItemResponses[6].getResponse()
     )
   );
