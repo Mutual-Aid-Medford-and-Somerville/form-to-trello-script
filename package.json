@@ -1,0 +1,31 @@
+{
+  "name": "form-to-trello-script",
+  "version": "1.0.0",
+  "description": "A Google Script for creating Trello cards from a Google Form. For use by MAMAS.",
+  "main": "script.gs",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mutual-Aid-Medford-and-Somerville/form-to-trello-script.git"
+  },
+  "keywords": [
+    "mutual",
+    "aid"
+  ],
+  "author": "MAMAS",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Mutual-Aid-Medford-and-Somerville/form-to-trello-script/issues"
+  },
+  "homepage": "https://github.com/Mutual-Aid-Medford-and-Somerville/form-to-trello-script#readme",
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "babel-jest": "^26.6.2",
+    "jest": "^26.6.2",
+    "moment": "^2.29.1",
+    "sprintf": "^0.1.5"
+  }
+}

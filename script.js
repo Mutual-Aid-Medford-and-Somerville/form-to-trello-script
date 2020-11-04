@@ -253,3 +253,7 @@ function submitToTrello(e) {
     i += parseLatestItemResponses(latestItemResponses, i, body, subject);
   }
 }
+
+module.exports = {
+  submitToTrello: submitToTrello
+};
