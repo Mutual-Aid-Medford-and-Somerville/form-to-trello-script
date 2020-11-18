@@ -4,7 +4,7 @@
   "description": "A Google Script for creating Trello cards from a Google Form. For use by MAMAS.",
   "main": "script.gs",
   "scripts": {
-    "test": "jest"
+    "test": "jest --watch"
   },
   "repository": {
     "type": "git",

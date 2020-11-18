@@ -20,19 +20,25 @@ const getResponsesMock = jest.fn(() => {
           // Actual questions
           {
             getItem: () => {
-              getTitle: () => 'Do you need financial resources?'
+              return {
+                getTitle: () => 'Do you need financial resources?'
+              };
             },
             getResponse: () => 'Yes'
           },
           {
             getItem: () => {
-              getTitle: () => 'Should throw an error?'
+              return {
+                getTitle: () => 'Should throw an error?'
+              };
             },
             getResponse: () => 'Yes'
           },
           {
             getItem: () => {
-              getTitle: () => 'Anything about yourself you’d like to share (zero expectation if you’d rather not)'
+              return {
+                getTitle: () => 'Anything about yourself you’d like to share (zero expectation if you’d rather not)'
+              };
             },
             getResponse: () => 'Yes'
           },
@@ -66,12 +72,27 @@ global.Logger = {
 }
 
 global.UrlFetchApp = {
-  fetch: jest.fn()
+  fetch: () => {
+    return {
+      getContentText: () => {
+        return JSON.stringify({
+          testname: 'test'
+        })
+      }
+    }
+  }
 }
 
 global.CacheService = {
   get: jest.fn(),
-  put: jest.fn()
+  put: jest.fn(),
+  getScriptCache: () => {
+    return {
+      get: (input) => {
+        if (input === 'request-label-cache') return null;
+      }
+    };
+  }
 }
 
 test('submitToTrello acts according to expectations', () => {
